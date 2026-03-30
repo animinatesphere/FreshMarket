@@ -138,30 +138,32 @@ export function Cart() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 text-white py-16 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-400 rounded-full blur-3xl opacity-20"></div>
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-orange-400 rounded-full blur-3xl opacity-20"></div>
+      <div className="bg-gradient-to-br from-orange-600 via-orange-500 to-orange-700 text-white py-8 sm:py-12 lg:py-16 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 sm:w-96 sm:h-96 bg-orange-400 rounded-full blur-3xl opacity-20"></div>
+        <div className="absolute bottom-0 left-0 w-48 h-48 sm:w-80 sm:h-80 bg-orange-400 rounded-full blur-3xl opacity-20"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <ShoppingBag className="h-8 w-8" />
-            <h1 className="text-5xl font-bold">Shopping Cart</h1>
+          <div className="flex items-center gap-2 sm:gap-3 mb-2">
+            <ShoppingBag className="h-6 w-6 sm:h-8 sm:w-8" />
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold">
+              Shopping Cart
+            </h1>
           </div>
-          <p className="text-orange-100 text-lg">
+          <p className="text-orange-100 text-sm sm:text-base lg:text-lg">
             {items.length} item{items.length !== 1 ? "s" : ""} ready for
             checkout
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
             <Card className="border border-gray-200 shadow-md hover:shadow-lg transition-shadow">
-              <CardContent className="p-8">
-                <div className="flex justify-between items-center mb-8 pb-6 border-b-2 border-gray-100">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-gray-100">
                   <div>
-                    <h2 className="text-3xl font-bold text-gray-900">
+                    <h2 className="text-2xl sm:text-3xl lg:text-3xl font-bold text-gray-900">
                       Your Items
                     </h2>
                     <p className="text-sm text-gray-500 mt-1">
@@ -179,49 +181,51 @@ export function Cart() {
                   </Button>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-5 lg:space-y-6">
                   {items.map((item, index) => (
                     <div
                       key={item.id}
-                      className="flex gap-4 p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all"
+                      className="flex flex-col sm:flex-row gap-3 sm:gap-4 p-3 sm:p-4 lg:p-5 bg-gradient-to-r from-gray-50 to-white rounded-lg sm:rounded-xl border border-gray-100 hover:border-orange-200 hover:shadow-md transition-all"
                     >
                       <div className="relative flex-shrink-0">
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-28 h-28 object-cover rounded-lg shadow-md"
+                          className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28 object-cover rounded-lg shadow-md"
                         />
                         <span className="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full">
                           {index + 1}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start mb-3">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-3">
                           <div className="flex-1">
                             <Link to={`/products/${item.id}`}>
-                              <h3 className="text-lg font-semibold text-gray-900 hover:text-orange-600 transition-colors line-clamp-2">
+                              <h3 className="text-base sm:text-lg font-semibold text-gray-900 hover:text-orange-600 transition-colors line-clamp-2">
                                 {item.name}
                               </h3>
                             </Link>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex flex-wrap items-center gap-2 mt-1">
                               <span className="inline-block px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded">
                                 {item.category}
                               </span>
-                              <span className="text-sm text-gray-500 font-medium">
+                              <span className="text-xs sm:text-sm text-gray-500 font-medium">
                                 {formatCurrency(item.price)}/{item.unit}
                               </span>
                             </div>
                           </div>
                           <button
                             onClick={() => removeFromCart(item.id)}
-                            className="flex-shrink-0 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                            className="flex-shrink-0 ml-auto sm:ml-3 p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                             title="Remove from cart"
                           >
-                            <Trash2 className="h-5 w-5" />
+                            <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
+                            \n{" "}
                           </button>
+                          \n{" "}
                         </div>
 
-                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-3 border-t border-gray-100 gap-3 sm:gap-0">
                           <div className="flex items-center gap-2">
                             <div className="flex items-center border border-gray-300 rounded-lg bg-white">
                               <button
@@ -280,14 +284,14 @@ export function Cart() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-24 border border-gray-200 shadow-lg">
-              <CardContent className="p-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-8 pb-6 border-b-2 border-gray-100">
+            <Card className="sticky top-20 lg:top-24 border border-gray-200 shadow-lg">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 pb-4 sm:pb-6 border-b-2 border-gray-100">
                   Order Summary
                 </h2>
 
                 {/* Promo Code Section */}
-                <div className="mb-8 p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border-2 border-dashed border-amber-200">
+                <div className="mb-6 sm:mb-8 p-4 sm:p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg sm:rounded-xl border-2 border-dashed border-amber-200">
                   <label className="block text-sm font-semibold mb-3 text-gray-900 flex items-center gap-2">
                     <Tag className="h-5 w-5 text-amber-600" />
                     Have a promo code?
@@ -339,7 +343,7 @@ export function Cart() {
                   )}
                 </div>
 
-                <div className="space-y-4 mb-8 pb-8 border-b-2 border-gray-100">
+                <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 pb-6 sm:pb-8 border-b-2 border-gray-100">
                   <div className="flex justify-between text-gray-700 font-medium">
                     <span>Subtotal</span>
                     <span className="font-semibold text-gray-900">
@@ -384,13 +388,15 @@ export function Cart() {
                   )}
                 </div>
 
-                <div className="mb-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl p-6 text-white shadow-lg">
-                  <p className="text-sm font-medium text-orange-50 mb-2">
+                <div className="mb-6 sm:mb-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg sm:rounded-xl p-4 sm:p-6 text-white shadow-lg">
+                  <p className="text-xs sm:text-sm font-medium text-orange-50 mb-2">
                     Amount Due
                   </p>
                   <div className="flex justify-between items-baseline">
-                    <span className="text-lg font-semibold">Total</span>
-                    <span className="text-4xl font-bold">
+                    <span className="text-sm sm:text-lg font-semibold">
+                      Total
+                    </span>
+                    <span className="text-3xl sm:text-4xl font-bold">
                       {formatCurrency(finalTotal)}
                     </span>
                   </div>
@@ -398,15 +404,15 @@ export function Cart() {
 
                 <Button
                   size="lg"
-                  className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold text-lg mb-4 shadow-lg hover:shadow-xl transition-all"
+                  className="w-full bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-bold text-base sm:text-lg mb-4 shadow-lg hover:shadow-xl transition-all"
                   onClick={() => setShowPaymentModal(true)}
                 >
                   Proceed to Checkout
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
 
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-5 rounded-xl border-2 border-blue-200">
-                  <h3 className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 sm:p-5 rounded-lg sm:rounded-xl border-2 border-blue-200">
+                  <h3 className="text-xs sm:text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
                     <span>🔒</span> Secure Payment Methods
                   </h3>
                   <div className="grid grid-cols-3 gap-2">
@@ -429,14 +435,16 @@ export function Cart() {
         {/* Payment Modal */}
         {showPaymentModal && (
           <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-lg border-0 shadow-2xl rounded-2xl overflow-hidden">
-              <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-8 py-6 text-white">
-                <h3 className="text-3xl font-bold">Select Payment Method</h3>
-                <p className="text-orange-100 text-sm mt-1">
+            <Card className="w-full max-w-lg border-0 shadow-2xl rounded-xl sm:rounded-2xl overflow-hidden">
+              <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-6 sm:px-8 py-4 sm:py-6 text-white">
+                <h3 className="text-2xl sm:text-3xl font-bold">
+                  Select Payment Method
+                </h3>
+                <p className="text-orange-100 text-xs sm:text-sm mt-1">
                   Choose how you'd like to pay for your order
                 </p>
               </div>
-              <CardContent className="p-8">
+              <CardContent className="p-4 sm:p-6 lg:p-8">
                 <div className="space-y-4 mb-8">
                   {[
                     {
