@@ -1,6 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
-import { Star, Heart } from "lucide-react";
+import {
+  Star,
+  Heart,
+  ShoppingCart as CartIcon,
+  Zap,
+  Truck,
+  Eye,
+} from "lucide-react";
 import { products, categories } from "../data/products";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -126,40 +133,33 @@ export function Products() {
             </div>
 
             {isLoading ? (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                 {Array.from({ length: 6 }).map((_, idx) => (
                   <SkeletonProductCard key={idx} />
                 ))}
               </div>
             ) : (
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
                 {filteredAndSortedProducts.map((product) => (
                   <Card
                     key={product.id}
-                    className="overflow-hidden hover:shadow-lg transition-shadow"
+                    className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group"
                   >
-                    <div className="relative">
-                      <Link to={`/products/${product.id}`}>
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="w-full h-56 object-cover"
-                        />
-                        {!product.inStock && (
-                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                            <span className="bg-white px-4 py-2 rounded text-sm">
-                              Out of Stock
-                            </span>
-                          </div>
-                        )}
-                      </Link>
+                    <div className="relative overflow-hidden bg-gray-100">
+                      {/* Discount Badge */}
+                      <div className="absolute top-2 left-2 z-10 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                        <Zap className="h-3 w-3" />
+                        -15%
+                      </div>
+
+                      {/* Wishlist Button */}
                       <button
                         onClick={() =>
                           isInWishlist(product.id)
                             ? removeFromWishlist(product.id)
                             : addToWishlist(product)
                         }
-                        className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+                        className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform z-10"
                       >
                         <Heart
                           className={`h-5 w-5 ${
@@ -169,27 +169,87 @@ export function Products() {
                           }`}
                         />
                       </button>
+
+                      {/* Quick View Button */}
+                      <Link
+                        to={`/products/${product.id}`}
+                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300"
+                      >
+                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <button className="bg-white text-gray-800 px-6 py-2 rounded-full font-semibold flex items-center gap-2 shadow-lg">
+                            <Eye className="h-4 w-4" />
+                            Quick View
+                          </button>
+                        </div>
+                      </Link>
+
+                      <Link to={`/products/${product.id}`}>
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                        />
+                        {!product.inStock && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                            <span className="bg-white px-4 py-2 rounded text-sm">
+                              Out of Stock
+                            </span>
+                          </div>
+                        )}
+                      </Link>
                     </div>
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">
+                    <CardContent className="p-3 flex-1 flex flex-col">
+                      {/* Category & Rating */}
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
                           {product.category}
                         </span>
                         {product.rating && (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                            <span className="text-sm">{product.rating}</span>
+                          <div className="flex items-center gap-0.5 bg-yellow-50 px-1.5 py-0.5 rounded">
+                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <span className="text-xs font-semibold text-gray-700">
+                              {product.rating}
+                            </span>
+                            <span className="text-xs text-gray-500">(428)</span>
                           </div>
                         )}
                       </div>
+
+                      {/* Product Name */}
                       <Link to={`/products/${product.id}`}>
-                        <h3 className="mb-2 hover:text-orange-600 transition-colors">
+                        <h3 className="mb-1 text-sm font-medium hover:text-orange-600 transition-colors line-clamp-2 h-8">
                           {product.name}
                         </h3>
                       </Link>
-                      <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                        {product.description}
-                      </p>
+
+                      {/* Verified Seller Badge */}
+                      <div className="flex items-center gap-1 mb-2 text-xs text-gray-600">
+                        <div className="h-3 w-3 bg-green-500 rounded-full"></div>
+                        <span>✓ Verified Seller</span>
+                      </div>
+
+                      {/* Price Section */}
+                      <div className="mb-2">
+                        <div className="flex items-baseline gap-2">
+                          <p className="text-lg font-bold text-orange-600">
+                            {formatCurrency(product.price)}
+                          </p>
+                          <p className="text-xs text-gray-500 line-through">
+                            {formatCurrency(Math.round(product.price * 1.18))}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500 font-medium">
+                          {product.unit}
+                        </p>
+                      </div>
+
+                      {/* Delivery Info */}
+                      <div className="flex items-center gap-1 mb-3 text-xs text-green-700 bg-green-50 px-2 py-1 rounded">
+                        <Truck className="h-3 w-3" />
+                        <span>Free Delivery</span>
+                      </div>
+
+                      {/* Stock */}
                       <div className="mb-3">
                         <StockBadge
                           stockQuantity={product.stockQuantity}
@@ -197,24 +257,16 @@ export function Products() {
                           size="sm"
                         />
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-2xl text-orange-600">
-                            {formatCurrency(product.price)}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {product.unit}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => addToCart(product)}
-                          disabled={!product.inStock}
-                          className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300"
-                        >
-                          {product.inStock ? "Add to Cart" : "Out of Stock"}
-                        </Button>
-                      </div>
+
+                      {/* Add to Cart Button */}
+                      <Button
+                        onClick={() => addToCart(product)}
+                        disabled={!product.inStock}
+                        className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300 text-white font-semibold flex items-center justify-center gap-2 mt-auto"
+                      >
+                        <CartIcon className="h-4 w-4" />
+                        {product.inStock ? "Add to Cart" : "Out of Stock"}
+                      </Button>
                     </CardContent>
                   </Card>
                 ))}
