@@ -16,6 +16,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { formatCurrency } from "../utils/currency";
 import { StockBadge } from "../components/StockBadge";
 import { SkeletonProductCard } from "../components/SkeletonCard";
+import { ImageLoader } from "../components/ImageLoader";
 
 export function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -145,9 +146,9 @@ export function Products() {
                     key={product.id}
                     className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group"
                   >
-                    <div className="relative overflow-hidden bg-gray-100">
+                    <div className="relative overflow-hidden bg-gray-100 h-48">
                       {/* Discount Badge */}
-                      <div className="absolute top-2 left-2 z-10 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
+                      <div className="absolute top-2 left-2 z-20 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
                         <Zap className="h-3 w-3" />
                         -15%
                       </div>
@@ -159,7 +160,7 @@ export function Products() {
                             ? removeFromWishlist(product.id)
                             : addToWishlist(product)
                         }
-                        className="absolute top-2 right-2 bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform z-10"
+                        className="absolute top-2 right-2 z-20 bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform"
                       >
                         <Heart
                           className={`h-5 w-5 ${
@@ -170,24 +171,13 @@ export function Products() {
                         />
                       </button>
 
-                      {/* Quick View Button */}
-                      <Link
-                        to={`/products/${product.id}`}
-                        className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300"
-                      >
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                          <button className="bg-white text-gray-800 px-6 py-2 rounded-full font-semibold flex items-center gap-2 shadow-lg">
-                            <Eye className="h-4 w-4" />
-                            Quick View
-                          </button>
-                        </div>
-                      </Link>
-
+                      {/* Product Image */}
                       <Link to={`/products/${product.id}`}>
-                        <img
+                        <ImageLoader
                           src={product.image}
                           alt={product.name}
-                          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+                          imageClassName="group-hover:scale-110 transition-transform duration-300"
+                          containerClassName="block w-full h-full"
                         />
                         {!product.inStock && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
@@ -197,6 +187,19 @@ export function Products() {
                           </div>
                         )}
                       </Link>
+
+                      {/* Quick View Button - Only visible on hover */}
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
+                        <Link
+                          to={`/products/${product.id}`}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                        >
+                          <button className="bg-white text-gray-800 px-6 py-2 rounded-full font-semibold flex items-center gap-2 shadow-lg">
+                            <Eye className="h-4 w-4" />
+                            Quick View
+                          </button>
+                        </Link>
+                      </div>
                     </div>
                     <CardContent className="p-3 flex-1 flex flex-col">
                       {/* Category & Rating */}
