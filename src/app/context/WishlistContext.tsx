@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product } from '../data/products';
+import { supabase } from '../utils/supabase';
+import { useAuth } from './AuthContext';
 
 interface WishlistContextType {
   wishlistItems: Product[];
@@ -12,34 +14,71 @@ interface WishlistContextType {
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
-  const [wishlistItems, setWishlistItems] = useState<Product[]>(() => {
-    const saved = localStorage.getItem('wishlist');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
+  const { user } = useAuth();
 
+  // Load wishlist from Supabase when user logs in
   useEffect(() => {
-    localStorage.setItem('wishlist', JSON.stringify(wishlistItems));
-  }, [wishlistItems]);
+    if (!user) {
+      setWishlistItems([]);
+      return;
+    }
+    loadWishlist();
+  }, [user]);
 
-  const addToWishlist = (product: Product) => {
+  const loadWishlist = async () => {
+    if (!user) return;
+    const { data, error } = await supabase
+      .from('wishlist')
+      .select('product_id')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error loading wishlist:', error);
+      return;
+    }
+
+    // We store just product_ids and match against the local products list
+    // The product details come from static data which the app already has
     setWishlistItems((prev) => {
-      if (prev.find((item) => item.id === product.id)) {
-        return prev;
-      }
-      return [...prev, product];
+      const ids = (data || []).map((r: any) => r.product_id);
+      return prev.filter((p) => ids.includes(p.id));
     });
   };
 
-  const removeFromWishlist = (productId: string) => {
+  const addToWishlist = async (product: Product) => {
+    if (wishlistItems.find((item) => item.id === product.id)) return;
+    setWishlistItems((prev) => [...prev, product]);
+
+    if (user) {
+      await supabase.from('wishlist').upsert({
+        user_id: user.id,
+        product_id: product.id,
+      });
+    }
+  };
+
+  const removeFromWishlist = async (productId: string) => {
     setWishlistItems((prev) => prev.filter((item) => item.id !== productId));
+
+    if (user) {
+      await supabase
+        .from('wishlist')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('product_id', productId);
+    }
   };
 
   const isInWishlist = (productId: string) => {
     return wishlistItems.some((item) => item.id === productId);
   };
 
-  const clearWishlist = () => {
+  const clearWishlist = async () => {
     setWishlistItems([]);
+    if (user) {
+      await supabase.from('wishlist').delete().eq('user_id', user.id);
+    }
   };
 
   return (

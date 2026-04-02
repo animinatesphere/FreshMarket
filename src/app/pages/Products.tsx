@@ -7,8 +7,10 @@ import {
   Zap,
   Truck,
   Eye,
+  Loader2,
 } from "lucide-react";
-import { products, categories } from "../data/products";
+import { supabase } from "../utils/supabase";
+import { categories, Product } from "../data/products";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
 import { Button } from "../components/ui/button";
@@ -23,23 +25,52 @@ export function Products() {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isLoading, setIsLoading] = useState(true);
+  const [dbProducts, setDbProducts] = useState<Product[]>([]);
 
   const categoryFromUrl = searchParams.get("category") || "All";
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const [sortBy, setSortBy] = useState("featured");
 
-  // Simulate loading on mount
+  // Fetch from Supabase
   useEffect(() => {
-    setIsLoading(true);
-    const timer = setTimeout(() => setIsLoading(false), 600);
-    return () => clearTimeout(timer);
+    const fetchProducts = async () => {
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        const mapped: Product[] = (data || []).map((p: any) => ({
+          id: p.id.toString(),
+          name: p.name,
+          description: p.description,
+          price: p.price,
+          category: p.category,
+          image: p.image,
+          unit: p.unit,
+          inStock: p.in_stock,
+          stockQuantity: p.stock_quantity,
+          featured: p.featured,
+          rating: p.rating,
+        }));
+        setDbProducts(mapped);
+      } catch (err) {
+        console.error("Fetch failed:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProducts();
   }, []);
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered =
       selectedCategory === "All"
-        ? products
-        : products.filter((p) => p.category === selectedCategory);
+        ? dbProducts
+        : dbProducts.filter((p) => p.category === selectedCategory);
 
     switch (sortBy) {
       case "price-low":
@@ -53,7 +84,7 @@ export function Products() {
       default:
         return filtered;
     }
-  }, [selectedCategory, sortBy]);
+  }, [selectedCategory, sortBy, dbProducts]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -79,7 +110,7 @@ export function Products() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filters */}
+          {/* Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
             <Card>
               <CardContent className="p-6">
@@ -120,7 +151,7 @@ export function Products() {
             </Card>
           </aside>
 
-          {/* Products Grid */}
+          {/* Grid */}
           <div className="flex-1">
             <div className="mb-6 flex items-center justify-between">
               <p className="text-gray-600">
@@ -135,7 +166,7 @@ export function Products() {
 
             {isLoading ? (
               <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                {Array.from({ length: 6 }).map((_, idx) => (
+                {Array.from({ length: 8 }).map((_, idx) => (
                   <SkeletonProductCard key={idx} />
                 ))}
               </div>
@@ -146,14 +177,7 @@ export function Products() {
                     key={product.id}
                     className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group"
                   >
-                    <div className="relative overflow-hidden bg-gray-100 h-48">
-                      {/* Discount Badge */}
-                      <div className="absolute top-2 left-2 z-20 bg-red-600 text-white px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-                        <Zap className="h-3 w-3" />
-                        -15%
-                      </div>
-
-                      {/* Wishlist Button */}
+                    <div className="relative h-48 bg-gray-100 overflow-hidden">
                       <button
                         onClick={() =>
                           isInWishlist(product.id)
@@ -171,105 +195,58 @@ export function Products() {
                         />
                       </button>
 
-                      {/* Product Image */}
                       <Link to={`/products/${product.id}`}>
                         <ImageLoader
                           src={product.image}
                           alt={product.name}
                           imageClassName="group-hover:scale-110 transition-transform duration-300"
-                          containerClassName="block w-full h-full"
                         />
                         {!product.inStock && (
-                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                            <span className="bg-white px-4 py-2 rounded text-sm">
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <span className="bg-white px-4 py-2 rounded text-sm font-bold">
                               Out of Stock
                             </span>
                           </div>
                         )}
                       </Link>
-
-                      {/* Quick View Button - Only visible on hover */}
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto">
-                        <Link
-                          to={`/products/${product.id}`}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                        >
-                          <button className="bg-white text-gray-800 px-6 py-2 rounded-full font-semibold flex items-center gap-2 shadow-lg">
-                            <Eye className="h-4 w-4" />
-                            Quick View
-                          </button>
-                        </Link>
-                      </div>
                     </div>
-                    <CardContent className="p-3 flex-1 flex flex-col">
-                      {/* Category & Rating */}
-                      <div className="flex items-center justify-between gap-2 mb-2">
+
+                    <CardContent className="p-4 flex-1 flex flex-col">
+                      <div className="flex items-center justify-between mb-2">
                         <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
                           {product.category}
                         </span>
-                        {product.rating && (
-                          <div className="flex items-center gap-0.5 bg-yellow-50 px-1.5 py-0.5 rounded">
+                        {product.rating > 0 && (
+                          <div className="flex items-center gap-1">
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                            <span className="text-xs font-semibold text-gray-700">
-                              {product.rating}
-                            </span>
-                            <span className="text-xs text-gray-500">(428)</span>
+                            <span className="text-xs font-bold">{product.rating}</span>
                           </div>
                         )}
                       </div>
 
-                      {/* Product Name */}
                       <Link to={`/products/${product.id}`}>
-                        <h3 className="mb-1 text-sm font-medium hover:text-orange-600 transition-colors line-clamp-2 h-8">
+                        <h3 className="text-sm font-semibold mb-2 hover:text-orange-600 truncate">
                           {product.name}
                         </h3>
                       </Link>
 
-                      {/* Verified Seller Badge */}
-                      <div className="flex items-center gap-1 mb-2 text-xs text-gray-600">
-                        <div className="h-3 w-3 bg-green-500 rounded-full"></div>
-                        <span>✓ Verified Seller</span>
-                      </div>
-
-                      {/* Price Section */}
-                      <div className="mb-2">
-                        <div className="flex items-baseline gap-2">
-                          <p className="text-lg font-bold text-orange-600">
-                            {formatCurrency(product.price)}
-                          </p>
-                          <p className="text-xs text-gray-500 line-through">
-                            {formatCurrency(Math.round(product.price * 1.18))}
-                          </p>
-                        </div>
-                        <p className="text-xs text-gray-500 font-medium">
-                          {product.unit}
+                      <div className="mb-4">
+                        <p className="text-lg font-bold text-orange-600">
+                          {formatCurrency(product.price)}
                         </p>
+                        <p className="text-xs text-gray-500">{product.unit}</p>
                       </div>
 
-                      {/* Delivery Info */}
-                      <div className="flex items-center gap-1 mb-3 text-xs text-green-700 bg-green-50 px-2 py-1 rounded">
-                        <Truck className="h-3 w-3" />
-                        <span>Free Delivery</span>
+                      <div className="mt-auto">
+                        <Button
+                          onClick={() => addToCart(product)}
+                          disabled={!product.inStock}
+                          className="w-full bg-orange-600 hover:bg-orange-700 gap-2"
+                        >
+                          <CartIcon className="h-4 w-4" />
+                          {product.inStock ? "Add to Cart" : "Out of Stock"}
+                        </Button>
                       </div>
-
-                      {/* Stock */}
-                      <div className="mb-3">
-                        <StockBadge
-                          stockQuantity={product.stockQuantity}
-                          inStock={product.inStock}
-                          size="sm"
-                        />
-                      </div>
-
-                      {/* Add to Cart Button */}
-                      <Button
-                        onClick={() => addToCart(product)}
-                        disabled={!product.inStock}
-                        className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300 text-white font-semibold flex items-center justify-center gap-2 mt-auto"
-                      >
-                        <CartIcon className="h-4 w-4" />
-                        {product.inStock ? "Add to Cart" : "Out of Stock"}
-                      </Button>
                     </CardContent>
                   </Card>
                 ))}
@@ -279,7 +256,7 @@ export function Products() {
             {!isLoading && filteredAndSortedProducts.length === 0 && (
               <div className="text-center py-12">
                 <p className="text-gray-500 text-lg">
-                  No products found in this category.
+                  No products found here yet.
                 </p>
               </div>
             )}

@@ -9,6 +9,7 @@ export function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoading, error } = useAuth();
+  // isLoading is ONLY true when the login form is actively submitting
   const navigate = useNavigate();
   const [formError, setFormError] = useState("");
 
@@ -22,8 +23,16 @@ export function Login() {
     }
 
     try {
-      await login(email, password);
-      navigate("/");
+      const user = await login(email, password);
+      console.log("LOGIN SUCCESS! User role:", user?.role);
+      
+      if (user && user.role === "admin") {
+        console.log("Redirecting to /admin...");
+        navigate("/admin");
+      } else {
+        console.log("Redirecting to / (Home)...");
+        navigate("/");
+      }
     } catch (err) {
       setFormError(
         "Invalid email or password. Try admin@freshmarket.com / admin123",
