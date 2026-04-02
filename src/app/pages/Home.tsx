@@ -106,7 +106,7 @@ export function Home() {
                 {currentBanner.title}
               </h1>
               <p className="text-lg sm:text-xl text-white/90 max-w-2xl animate-in fade-in slide-in-from-left-8 duration-700 delay-100">
-                {currentBanner.description}
+                {currentBanner.description.trim().slice(0, 150)}
               </p>
               <div className="flex justify-start gap-4 pt-4 animate-in fade-in slide-in-from-left-8 duration-700 delay-200">
                 <Link to="/products">
