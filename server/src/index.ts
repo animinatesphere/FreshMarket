@@ -25,8 +25,9 @@ const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow non-browser requests (no Origin header) and any explicitly listed origin
-      if (!origin || allowedOrigins.includes(origin)) {
+      // Allow non-browser requests (no Origin header), a "*" bootstrap wildcard,
+      // and any explicitly listed origin.
+      if (!origin || allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
       callback(new Error("Not allowed by CORS"));
