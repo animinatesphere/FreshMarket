@@ -19,13 +19,13 @@ export function Wishlist() {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
-          <Heart className="h-24 w-24 text-gray-300 mx-auto mb-4" />
+          <Heart className="h-24 w-24 text-muted-foreground/30 mx-auto mb-4" />
           <h2 className="text-3xl mb-4">Your Wishlist is Empty</h2>
-          <p className="text-gray-600 mb-8">
+          <p className="text-muted-foreground mb-8">
             Save your favorite products to your wishlist and they will appear here.
           </p>
           <Link to="/products">
-            <Button size="lg" className="bg-orange-600 hover:bg-orange-700">
+            <Button size="lg">
               Start Shopping
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
@@ -36,11 +36,11 @@ export function Wishlist() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="bg-orange-600 text-white py-12">
+    <div className="bg-background min-h-screen">
+      <div className="bg-primary text-primary-foreground py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1 className="text-4xl mb-2">My Wishlist</h1>
-          <p className="text-orange-100">
+          <p className="text-primary-foreground/80">
             {wishlistItems.length} item{wishlistItems.length !== 1 ? 's' : ''} saved for later
           </p>
         </div>
@@ -52,7 +52,7 @@ export function Wishlist() {
             variant="ghost"
             size="sm"
             onClick={clearWishlist}
-            className="text-red-600 hover:text-red-700"
+            className="text-destructive hover:text-destructive"
           >
             Clear All
           </Button>
@@ -60,12 +60,12 @@ export function Wishlist() {
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {wishlistItems.map((product) => (
-            <Card key={product.id} className="overflow-hidden hover:shadow-lg transition-shadow relative">
+            <Card key={product.id} className="overflow-hidden border-0 shadow-sm card-hover relative">
               <button
                 onClick={() => removeFromWishlist(product.id)}
-                className="absolute top-2 right-2 z-10 bg-white p-2 rounded-full shadow-md hover:bg-red-50 transition-colors"
+                className="absolute top-2 right-2 z-10 bg-card p-2 rounded-full shadow-md hover:bg-destructive/10 transition-colors"
               >
-                <Trash2 className="h-4 w-4 text-red-600" />
+                <Trash2 className="h-4 w-4 text-destructive" />
               </button>
 
               <Link to={`/products/${product.id}`}>
@@ -78,24 +78,24 @@ export function Wishlist() {
 
               <CardContent className="p-4">
                 <Link to={`/products/${product.id}`}>
-                  <h3 className="mb-2 hover:text-orange-600 transition-colors">
+                  <h3 className="mb-2 hover:text-accent transition-colors font-sans">
                     {product.name}
                   </h3>
                 </Link>
-                <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                   {product.description}
                 </p>
                 <div className="flex items-center justify-between mb-3">
                   <div>
-                    <p className="text-2xl text-orange-600">{formatCurrency(product.price)}</p>
-                    <p className="text-xs text-gray-500">{product.unit}</p>
+                    <p className="text-2xl text-primary font-bold">{formatCurrency(product.price)}</p>
+                    <p className="text-xs text-muted-foreground">{product.unit}</p>
                   </div>
                 </div>
                 <Button
                   size="sm"
                   onClick={() => handleAddToCart(product)}
                   disabled={!product.inStock}
-                  className="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-gray-300"
+                  className="w-full"
                 >
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   {product.inStock ? 'Add to Cart' : 'Out of Stock'}

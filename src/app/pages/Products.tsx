@@ -1,15 +1,7 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router";
-import {
-  Star,
-  Heart,
-  ShoppingCart as CartIcon,
-  Zap,
-  Truck,
-  Eye,
-  Loader2,
-} from "lucide-react";
-import { supabase } from "../utils/supabase";
+import { Star, Heart, ShoppingCart as CartIcon } from "lucide-react";
+import { api } from "../lib/api";
 import { categories, Product } from "../data/products";
 import { useCart } from "../context/CartContext";
 import { useWishlist } from "../context/WishlistContext";
@@ -25,94 +17,56 @@ export function Products() {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isLoading, setIsLoading] = useState(true);
-  const [dbProducts, setDbProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
 
   const categoryFromUrl = searchParams.get("category") || "All";
   const [selectedCategory, setSelectedCategory] = useState(categoryFromUrl);
   const [sortBy, setSortBy] = useState("featured");
 
-  // Fetch from Supabase
   useEffect(() => {
     const fetchProducts = async () => {
       setIsLoading(true);
       try {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-
-        const mapped: Product[] = (data || []).map((p: any) => ({
-          id: p.id.toString(),
-          name: p.name,
-          description: p.description,
-          price: p.price,
-          category: p.category,
-          image: p.image,
-          unit: p.unit,
-          inStock: p.in_stock,
-          stockQuantity: p.stock_quantity,
-          featured: p.featured,
-          rating: p.rating,
-        }));
-        setDbProducts(mapped);
+        const params = new URLSearchParams();
+        if (selectedCategory !== "All") params.set("category", selectedCategory);
+        params.set("sort", sortBy);
+        const data = await api.get<Product[]>(`/products?${params.toString()}`);
+        setProducts(data);
       } catch (err) {
-        console.error("Fetch failed:", err);
+        console.error("Failed to load products:", err);
       } finally {
         setIsLoading(false);
       }
     };
     fetchProducts();
-  }, []);
-
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered =
-      selectedCategory === "All"
-        ? dbProducts
-        : dbProducts.filter((p) => p.category === selectedCategory);
-
-    switch (sortBy) {
-      case "price-low":
-        return [...filtered].sort((a, b) => a.price - b.price);
-      case "price-high":
-        return [...filtered].sort((a, b) => b.price - a.price);
-      case "name":
-        return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
-      case "rating":
-        return [...filtered].sort((a, b) => (b.rating || 0) - (a.rating || 0));
-      default:
-        return filtered;
-    }
-  }, [selectedCategory, sortBy, dbProducts]);
+  }, [selectedCategory, sortBy]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    if (category === "All") {
-      setSearchParams({});
-    } else {
-      setSearchParams({ category });
-    }
+    setSearchParams(category === "All" ? {} : { category });
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-background min-h-screen">
       {/* Header */}
-      <div className="bg-orange-600 text-white py-12">
+      <div className="bg-primary text-primary-foreground py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl mb-4">Our Products</h1>
-          <p className="text-orange-100 max-w-2xl">
+          <p className="uppercase tracking-[0.2em] text-xs font-semibold text-primary-foreground/70 mb-3">
+            The Market
+          </p>
+          <h1 className="text-4xl md:text-5xl mb-4">Our Products</h1>
+          <p className="text-primary-foreground/80 max-w-2xl">
             Browse our complete selection of fresh, organic, and sustainably
             sourced food products.
           </p>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
-            <Card>
+            <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
                 <div className="mb-6">
                   <h3 className="mb-4">Categories</h3>
@@ -121,10 +75,10 @@ export function Products() {
                       <button
                         key={category}
                         onClick={() => handleCategoryChange(category)}
-                        className={`w-full text-left px-4 py-2 rounded transition-colors ${
+                        className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
                           selectedCategory === category
-                            ? "bg-orange-600 text-white"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-foreground/70 hover:bg-accent/10"
                         }`}
                       >
                         {category}
@@ -138,7 +92,7 @@ export function Products() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md"
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-input-background"
                   >
                     <option value="featured">Featured</option>
                     <option value="name">Name (A-Z)</option>
@@ -154,11 +108,11 @@ export function Products() {
           {/* Grid */}
           <div className="flex-1">
             <div className="mb-6 flex items-center justify-between">
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {!isLoading && (
                   <>
-                    Showing {filteredAndSortedProducts.length} product
-                    {filteredAndSortedProducts.length !== 1 ? "s" : ""}
+                    Showing {products.length} product
+                    {products.length !== 1 ? "s" : ""}
                   </>
                 )}
               </p>
@@ -172,25 +126,25 @@ export function Products() {
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 lg:gap-6">
-                {filteredAndSortedProducts.map((product) => (
+                {products.map((product) => (
                   <Card
                     key={product.id}
-                    className="overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col group"
+                    className="overflow-hidden border-0 shadow-sm card-hover flex flex-col group"
                   >
-                    <div className="relative h-48 bg-gray-100 overflow-hidden">
+                    <div className="relative h-48 bg-muted overflow-hidden">
                       <button
                         onClick={() =>
                           isInWishlist(product.id)
                             ? removeFromWishlist(product.id)
                             : addToWishlist(product)
                         }
-                        className="absolute top-2 right-2 z-20 bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+                        className="absolute top-2 right-2 z-20 bg-card p-2 rounded-full shadow-md hover:scale-110 transition-transform"
                       >
                         <Heart
                           className={`h-5 w-5 ${
                             isInWishlist(product.id)
-                              ? "fill-red-500 text-red-500"
-                              : "text-gray-600"
+                              ? "fill-accent text-accent"
+                              : "text-foreground/60"
                           }`}
                         />
                       </button>
@@ -202,8 +156,8 @@ export function Products() {
                           imageClassName="group-hover:scale-110 transition-transform duration-300"
                         />
                         {!product.inStock && (
-                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <span className="bg-white px-4 py-2 rounded text-sm font-bold">
+                          <div className="absolute inset-0 bg-foreground/50 flex items-center justify-center">
+                            <span className="bg-card px-4 py-2 rounded text-sm font-bold">
                               Out of Stock
                             </span>
                           </div>
@@ -213,35 +167,39 @@ export function Products() {
 
                     <CardContent className="p-4 flex-1 flex flex-col">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded font-medium">
+                        <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded-full font-medium">
                           {product.category}
                         </span>
                         {product.rating > 0 && (
                           <div className="flex items-center gap-1">
-                            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                            <Star className="h-3 w-3 fill-accent text-accent" />
                             <span className="text-xs font-bold">{product.rating}</span>
                           </div>
                         )}
                       </div>
 
                       <Link to={`/products/${product.id}`}>
-                        <h3 className="text-sm font-semibold mb-2 hover:text-orange-600 truncate">
+                        <h3 className="text-sm font-semibold mb-1 hover:text-accent truncate font-sans">
                           {product.name}
                         </h3>
                       </Link>
 
+                      <div className="mb-2">
+                        <StockBadge inStock={product.inStock} stockQuantity={product.stockQuantity} size="sm" />
+                      </div>
+
                       <div className="mb-4">
-                        <p className="text-lg font-bold text-orange-600">
+                        <p className="text-lg font-bold text-primary">
                           {formatCurrency(product.price)}
                         </p>
-                        <p className="text-xs text-gray-500">{product.unit}</p>
+                        <p className="text-xs text-muted-foreground">{product.unit}</p>
                       </div>
 
                       <div className="mt-auto">
                         <Button
                           onClick={() => addToCart(product)}
                           disabled={!product.inStock}
-                          className="w-full bg-orange-600 hover:bg-orange-700 gap-2"
+                          className="w-full gap-2"
                         >
                           <CartIcon className="h-4 w-4" />
                           {product.inStock ? "Add to Cart" : "Out of Stock"}
@@ -253,9 +211,9 @@ export function Products() {
               </div>
             )}
 
-            {!isLoading && filteredAndSortedProducts.length === 0 && (
+            {!isLoading && products.length === 0 && (
               <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">
+                <p className="text-muted-foreground text-lg">
                   No products found here yet.
                 </p>
               </div>

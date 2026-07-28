@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { AlertCircle, Loader2, ArrowLeft, Leaf } from "lucide-react";
+import { AlertCircle, Loader2, ArrowLeft, Leaf, Check } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+
+const benefits = [
+  { title: "Get 10% Welcome Bonus", subtitle: "on your first order" },
+  { title: "Exclusive Offers", subtitle: "member-only deals" },
+  { title: "Loyalty Rewards", subtitle: "earn points with every purchase" },
+];
 
 export function Signup() {
   const [name, setName] = useState("");
@@ -17,7 +23,6 @@ export function Signup() {
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
-    // Calculate password strength
     let strength = 0;
     if (value.length >= 8) strength++;
     if (/[A-Z]/.test(value)) strength++;
@@ -34,12 +39,10 @@ export function Signup() {
       setFormError("Please fill in all fields");
       return;
     }
-
     if (password !== confirmPassword) {
       setFormError("Passwords do not match");
       return;
     }
-
     if (password.length < 6) {
       setFormError("Password must be at least 6 characters");
       return;
@@ -54,109 +57,48 @@ export function Signup() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex">
+    <div className="min-h-screen bg-[#14201a] flex">
       {/* Left Side - Brand & Visual */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-600 to-emerald-700 relative overflow-hidden flex-col justify-between p-12">
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-green-500 rounded-full blur-3xl opacity-20"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-500 rounded-full blur-3xl opacity-20"></div>
+      <div className="hidden lg:flex lg:w-1/2 bg-primary relative overflow-hidden flex-col justify-between p-12">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-accent rounded-full blur-3xl opacity-20" />
+        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary-foreground rounded-full blur-3xl opacity-10" />
 
-        {/* Logo/Brand */}
         <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-2 text-white">
+          <Link to="/" className="flex items-center gap-2 text-primary-foreground">
             <Leaf className="h-8 w-8" />
-            <span className="text-2xl font-bold">FreshMarket</span>
+            <span className="text-2xl font-serif">FreshMarket</span>
           </Link>
         </div>
 
-        {/* Main Content */}
         <div className="relative z-10 space-y-6">
-          <h1 className="text-5xl font-bold text-white leading-tight">
+          <h1 className="text-5xl text-primary-foreground leading-tight">
             Join Our Community of Healthy Eaters
           </h1>
-          <p className="text-xl text-green-100 leading-relaxed">
+          <p className="text-xl text-primary-foreground/75 leading-relaxed">
             Get access to fresh organic products, exclusive deals, and a
             personalized shopping experience.
           </p>
 
-          {/* Benefits List */}
           <div className="space-y-4 pt-6">
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
+            {benefits.map((benefit) => (
+              <div key={benefit.title} className="flex items-start gap-3">
+                <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center flex-shrink-0">
+                  <Check className="w-5 h-5 text-accent-foreground" />
+                </div>
+                <div>
+                  <p className="font-semibold text-primary-foreground">{benefit.title}</p>
+                  <p className="text-sm text-primary-foreground/70">{benefit.subtitle}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-semibold text-white">
-                  Get 10% Welcome Bonus
-                </p>
-                <p className="text-sm text-green-100">on your first order</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-semibold text-white">Exclusive Offers</p>
-                <p className="text-sm text-green-100">member-only deals</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-lg bg-green-500 flex items-center justify-center flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <div>
-                <p className="font-semibold text-white">Loyalty Rewards</p>
-                <p className="text-sm text-green-100">
-                  earn points with every purchase
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Bottom CTA */}
         <div className="relative z-10">
-          <p className="text-green-100">Already have an account?</p>
+          <p className="text-primary-foreground/70">Already have an account?</p>
           <Link
             to="/login"
-            className="inline-flex items-center gap-2 text-white font-semibold mt-2 hover:gap-3 transition-all"
+            className="inline-flex items-center gap-2 text-primary-foreground font-semibold mt-2 hover:gap-3 transition-all"
           >
             <ArrowLeft className="h-4 w-4" /> Sign In
           </Link>
@@ -164,36 +106,28 @@ export function Signup() {
       </div>
 
       {/* Right Side - Signup Form */}
-      <div className="w-full lg:w-1/2 bg-white flex flex-col justify-center px-6 sm:px-12 py-12 overflow-y-auto">
+      <div className="w-full lg:w-1/2 bg-card flex flex-col justify-center px-6 sm:px-12 py-12 overflow-y-auto">
         <div className="max-w-md w-full mx-auto">
-          {/* Mobile Logo */}
           <Link to="/" className="lg:hidden flex items-center gap-2 mb-8">
-            <Leaf className="h-6 w-6 text-green-600" />
-            <span className="text-xl font-bold text-gray-900">FreshMarket</span>
+            <Leaf className="h-6 w-6 text-primary" />
+            <span className="text-xl font-serif">FreshMarket</span>
           </Link>
 
           <div className="space-y-2 mb-8">
-            <h2 className="text-4xl font-bold text-gray-900">Create Account</h2>
-            <p className="text-gray-600">
-              Join us and get 10% off on your first order
-            </p>
+            <h2 className="text-4xl">Create Account</h2>
+            <p className="text-muted-foreground">Join us and get 10% off on your first order</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {(error || formError) && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex gap-3">
-                <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-red-800">{error || formError}</p>
+              <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-4 flex gap-3">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-destructive">{error || formError}</p>
               </div>
             )}
 
             <div className="space-y-2">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Full Name
-              </label>
+              <label htmlFor="name" className="block text-sm font-medium">Full Name</label>
               <Input
                 id="name"
                 type="text"
@@ -201,17 +135,12 @@ export function Signup() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={isLoading}
-                className="h-11 rounded-lg border-gray-300 focus:border-green-600 focus:ring-green-600"
+                className="h-11 rounded-lg"
               />
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email Address
-              </label>
+              <label htmlFor="email" className="block text-sm font-medium">Email Address</label>
               <Input
                 id="email"
                 type="email"
@@ -219,17 +148,12 @@ export function Signup() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                className="h-11 rounded-lg border-gray-300 focus:border-green-600 focus:ring-green-600"
+                className="h-11 rounded-lg"
               />
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
+              <label htmlFor="password" className="block text-sm font-medium">Password</label>
               <Input
                 id="password"
                 type="password"
@@ -237,26 +161,26 @@ export function Signup() {
                 value={password}
                 onChange={(e) => handlePasswordChange(e.target.value)}
                 disabled={isLoading}
-                className="h-11 rounded-lg border-gray-300 focus:border-green-600 focus:ring-green-600"
+                className="h-11 rounded-lg"
               />
               {password && (
                 <div className="flex gap-2 mt-2">
-                  <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all ${
                         passwordStrength === 1
-                          ? "w-1/4 bg-red-500"
+                          ? "w-1/4 bg-destructive"
                           : passwordStrength === 2
-                            ? "w-1/2 bg-yellow-500"
+                            ? "w-1/2 bg-accent"
                             : passwordStrength === 3
-                              ? "w-3/4 bg-blue-500"
+                              ? "w-3/4 bg-chart-3"
                               : passwordStrength === 4
-                                ? "w-full bg-green-500"
+                                ? "w-full bg-primary"
                                 : "w-0"
                       }`}
-                    ></div>
+                    />
                   </div>
-                  <span className="text-xs font-medium text-gray-600">
+                  <span className="text-xs font-medium text-muted-foreground">
                     {passwordStrength === 1 && "Weak"}
                     {passwordStrength === 2 && "Fair"}
                     {passwordStrength === 3 && "Good"}
@@ -267,12 +191,7 @@ export function Signup() {
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Confirm Password
-              </label>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium">Confirm Password</label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -280,26 +199,18 @@ export function Signup() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
-                className="h-11 rounded-lg border-gray-300 focus:border-green-600 focus:ring-green-600"
+                className="h-11 rounded-lg"
               />
             </div>
 
             <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                className="rounded border-gray-300 text-green-600 focus:ring-green-600"
-                defaultChecked
-              />
-              <span className="text-sm text-gray-600">
+              <input type="checkbox" className="rounded border-border text-primary focus:ring-ring" defaultChecked />
+              <span className="text-sm text-muted-foreground">
                 I agree to the Terms of Service and Privacy Policy
               </span>
             </label>
 
-            <Button
-              type="submit"
-              className="w-full h-11 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors"
-              disabled={isLoading}
-            >
+            <Button type="submit" className="w-full h-11 rounded-lg" disabled={isLoading}>
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -312,29 +223,20 @@ export function Signup() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200"></div>
+                <div className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
-                  Already have an account?
-                </span>
+                <span className="px-2 bg-card text-muted-foreground">Already have an account?</span>
               </div>
             </div>
 
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full h-11 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg"
-              asChild
-            >
+            <Button type="button" variant="outline" className="w-full h-11 rounded-lg" asChild>
               <Link to="/login">Sign In</Link>
             </Button>
           </form>
 
-          {/* Footer Text */}
-          <p className="text-xs text-gray-500 text-center mt-8">
-            By creating an account, you agree to our Terms of Service and
-            Privacy Policy
+          <p className="text-xs text-muted-foreground text-center mt-8">
+            By creating an account, you agree to our Terms of Service and Privacy Policy
           </p>
         </div>
       </div>

@@ -13,9 +13,6 @@ export interface Product {
   label?: string;
 }
 
-// We keep the products array empty because we now fetch from Supabase!
-export const products: Product[] = [];
-
 export const categories = [
   "All",
   "Vegetables",

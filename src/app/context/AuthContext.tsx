@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { supabase } from "../utils/supabase";
-import type { Session } from "@supabase/supabase-js";
+import { api, setToken, getToken, ApiError } from "../lib/api";
 
 export interface User {
   id: string;
@@ -17,135 +16,51 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<User | null>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  isLoading: boolean;       
-  isInitializing: boolean;  
+  isLoading: boolean;
+  isInitializing: boolean;
   error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Failsafe for admin user
-const ADMIN_EMAILS = ["admin@freshmarket.com"];
-
-const isEmailAdmin = (email?: string) => ADMIN_EMAILS.includes(email?.toLowerCase().trim() || "");
-
-console.log("%c[AuthContext] VERSION 3.0 (BULLETPROOF) LOADED", "color: green; font-weight: bold;");
-
-async function fetchProfile(userId: string): Promise<User | null> {
-  console.log("[AuthContext] fetchProfile start for:", userId);
-  
-  // Use Promise.race to guarantee this function returns within 2 seconds
-  const dbPromise = supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", userId)
-    .maybeSingle();
-
-  const timeoutPromise = new Promise((_, reject) => 
-    setTimeout(() => reject(new Error("DB_TIMEOUT")), 2000)
-  );
-
-  try {
-    const result = await Promise.race([dbPromise, timeoutPromise]) as any;
-    
-    if (result.error) {
-      console.error("[AuthContext] DB Error:", result.error.message);
-      return null;
-    }
-    
-    if (!result.data) {
-      console.warn("[AuthContext] Profile row missing.");
-      return null;
-    }
-
-    return {
-      id: result.data.id,
-      email: result.data.email,
-      name: result.data.name,
-      role: result.data.role as "user" | "admin",
-      createdAt: result.data.created_at,
-    };
-  } catch (err) {
-    console.warn("[AuthContext] fetchProfile bypassed (timed out or failed).");
-    return null;
-  }
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);       
-  const [isInitializing, setIsInitializing] = useState(true); 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const createFallbackUser = (sessionUser: any): User => ({
-    id: sessionUser.id,
-    email: sessionUser.email || "",
-    name: sessionUser.user_metadata?.name || (isEmailAdmin(sessionUser.email) ? "Admin" : "User"),
-    role: isEmailAdmin(sessionUser.email) ? "admin" : "user",
-    createdAt: sessionUser.created_at
-  });
-
   useEffect(() => {
-    const initSession = async () => {
+    const restoreSession = async () => {
+      if (!getToken()) {
+        setIsInitializing(false);
+        return;
+      }
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          setUser(profile || createFallbackUser(session.user));
-        }
-      } catch (err) {
-        console.error("[AuthContext] initSession failed:", err);
+        const { user: me } = await api.get<{ user: User }>("/auth/me");
+        setUser(me);
+      } catch {
+        setToken(null);
       } finally {
         setIsInitializing(false);
       }
     };
-    initSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session: Session | null) => {
-        if (session?.user) {
-          const profile = await fetchProfile(session.user.id);
-          setUser(profile || createFallbackUser(session.user));
-        } else {
-          setUser(null);
-        }
-        setIsInitializing(false);
-      }
-    );
-    return () => subscription.unsubscribe();
+    restoreSession();
   }, []);
 
   const login = async (email: string, password: string): Promise<User | null> => {
-    console.log("[AuthContext] Login requested:", email);
     setIsLoading(true);
     setError(null);
-
     try {
-      const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
-      
-      if (loginError) throw loginError;
-      
-      if (data.user) {
-        console.log("[AuthContext] Auth Success (SignedIn)");
-        
-        // ADMIN BYPASS: Don't even wait for the database if it's the admin email
-        if (isEmailAdmin(data.user.email)) {
-            console.log("[AuthContext] ADMIN DETECTED - Bypassing DB check for immediate redirect.");
-            const adminUser = createFallbackUser(data.user);
-            setUser(adminUser);
-            setIsLoading(false);
-            return adminUser; 
-        }
-
-        const profile = await fetchProfile(data.user.id);
-        const finalUser = profile || createFallbackUser(data.user);
-        setUser(finalUser);
-        return finalUser;
-      }
-      return null;
-    } catch (err: any) {
-      console.error("[AuthContext] Login error:", err.message);
-      setError(err.message || "Login failed");
+      const { token, user: loggedInUser } = await api.post<{ token: string; user: User }>("/auth/login", {
+        email,
+        password,
+      });
+      setToken(token);
+      setUser(loggedInUser);
+      return loggedInUser;
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Login failed";
+      setError(message);
       throw err;
     } finally {
       setIsLoading(false);
@@ -156,30 +71,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, error: signUpError } = await supabase.auth.signUp({
+      const { token, user: newUser } = await api.post<{ token: string; user: User }>("/auth/signup", {
+        name,
         email,
         password,
-        options: { data: { name } },
       });
-      if (signUpError) throw signUpError;
-      if (data.user) {
-        await supabase.from("profiles").upsert({
-          id: data.user.id,
-          name,
-          email,
-          role: "user",
-        });
-      }
-    } catch (err: any) {
-      setError(err.message || "Signup failed");
+      setToken(token);
+      setUser(newUser);
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "Signup failed";
+      setError(message);
       throw err;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const logout = async () => {
-    await supabase.auth.signOut();
+  const logout = () => {
+    setToken(null);
     setUser(null);
   };
 

@@ -12,10 +12,10 @@ interface BreadcrumbsProps {
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {
   return (
-    <nav className="flex items-center gap-2 text-sm text-gray-600 mb-6">
+    <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
       <Link
         to="/"
-        className="hover:text-orange-600 transition-colors flex items-center gap-1"
+        className="hover:text-accent transition-colors flex items-center gap-1"
       >
         <Home className="h-4 w-4" />
         <span>Home</span>
@@ -27,12 +27,12 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
           {item.path && index < items.length - 1 ? (
             <Link
               to={item.path}
-              className="hover:text-orange-600 transition-colors"
+              className="hover:text-accent transition-colors"
             >
               {item.label}
             </Link>
           ) : (
-            <span className="text-gray-900 font-medium">{item.label}</span>
+            <span className="text-foreground font-medium">{item.label}</span>
           )}
         </div>
       ))}

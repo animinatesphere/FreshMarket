@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product } from '../data/products';
-import { supabase } from '../utils/supabase';
+import { api } from '../lib/api';
 import { useAuth } from './AuthContext';
 
 interface WishlistContextType {
@@ -17,33 +17,22 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const [wishlistItems, setWishlistItems] = useState<Product[]>([]);
   const { user } = useAuth();
 
-  // Load wishlist from Supabase when user logs in
   useEffect(() => {
     if (!user) {
       setWishlistItems([]);
       return;
     }
     loadWishlist();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const loadWishlist = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from('wishlist')
-      .select('product_id')
-      .eq('user_id', user.id);
-
-    if (error) {
-      console.error('Error loading wishlist:', error);
-      return;
+    try {
+      const data = await api.get<Product[]>('/wishlist');
+      setWishlistItems(data);
+    } catch (err) {
+      console.error('Error loading wishlist:', err);
     }
-
-    // We store just product_ids and match against the local products list
-    // The product details come from static data which the app already has
-    setWishlistItems((prev) => {
-      const ids = (data || []).map((r: any) => r.product_id);
-      return prev.filter((p) => ids.includes(p.id));
-    });
   };
 
   const addToWishlist = async (product: Product) => {
@@ -51,10 +40,11 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     setWishlistItems((prev) => [...prev, product]);
 
     if (user) {
-      await supabase.from('wishlist').upsert({
-        user_id: user.id,
-        product_id: product.id,
-      });
+      try {
+        await api.post('/wishlist', { productId: product.id });
+      } catch (err) {
+        console.error('Error adding to wishlist:', err);
+      }
     }
   };
 
@@ -62,11 +52,11 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     setWishlistItems((prev) => prev.filter((item) => item.id !== productId));
 
     if (user) {
-      await supabase
-        .from('wishlist')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
+      try {
+        await api.delete(`/wishlist/${productId}`);
+      } catch (err) {
+        console.error('Error removing from wishlist:', err);
+      }
     }
   };
 
@@ -77,7 +67,11 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const clearWishlist = async () => {
     setWishlistItems([]);
     if (user) {
-      await supabase.from('wishlist').delete().eq('user_id', user.id);
+      try {
+        await api.delete('/wishlist');
+      } catch (err) {
+        console.error('Error clearing wishlist:', err);
+      }
     }
   };
 

@@ -56,13 +56,13 @@ export function Layout() {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-50">
+      <header className="bg-card border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2">
-              <Leaf className="h-8 w-8 text-orange-600" />
-              <span className="text-xl font-semibold text-gray-900">
+              <Leaf className="h-7 w-7 text-primary" />
+              <span className="text-xl font-serif text-foreground">
                 FreshMarket
               </span>
             </Link>
@@ -75,8 +75,8 @@ export function Layout() {
                   to={item.path}
                   className={`transition-colors ${
                     isActive(item.path)
-                      ? "text-orange-600"
-                      : "text-gray-600 hover:text-gray-900"
+                      ? "text-accent"
+                      : "text-foreground/70 hover:text-foreground"
                   }`}
                 >
                   {item.name}
@@ -88,18 +88,18 @@ export function Layout() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setSearchModalOpen(true)}
-                className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className="p-2 text-foreground/70 hover:text-foreground transition-colors"
               >
                 <Search className="h-5 w-5" />
               </button>
 
               <Link
                 to="/wishlist"
-                className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors hidden sm:block"
+                className="relative p-2 text-foreground/70 hover:text-foreground transition-colors hidden sm:block"
               >
                 <Heart className="h-5 w-5" />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {wishlistItems.length}
                   </span>
                 )}
@@ -109,14 +109,14 @@ export function Layout() {
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="p-2 text-gray-600 hover:text-gray-900 transition-colors hidden sm:block">
+                    <button className="p-2 text-foreground/70 hover:text-foreground transition-colors hidden sm:block">
                       <User className="h-5 w-5" />
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     <div className="px-2 py-1.5">
                       <p className="text-sm font-medium">{user.name}</p>
-                      <p className="text-xs text-gray-500">{user.email}</p>
+                      <p className="text-xs text-muted-foreground">{user.email}</p>
                     </div>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
@@ -145,7 +145,7 @@ export function Layout() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => logout()}
-                      className="flex items-center gap-2 text-red-600"
+                      className="flex items-center gap-2 text-destructive"
                     >
                       <LogOut className="h-4 w-4" />
                       Logout
@@ -153,17 +153,17 @@ export function Layout() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <div className="hidden sm:flex gap-2">
+                <div className="hidden sm:flex gap-2 items-center">
                   <Link
                     to="/login"
-                    className="text-gray-600 hover:text-gray-900 transition-colors text-sm font-medium"
+                    className="text-foreground/70 hover:text-foreground transition-colors text-sm font-medium"
                   >
                     Sign In
                   </Link>
-                  <span className="text-gray-300">|</span>
+                  <span className="text-border">|</span>
                   <Link
                     to="/signup"
-                    className="text-orange-600 hover:text-orange-700 transition-colors text-sm font-medium"
+                    className="text-accent hover:text-accent/80 transition-colors text-sm font-medium"
                   >
                     Join
                   </Link>
@@ -172,11 +172,11 @@ export function Layout() {
 
               <Link
                 to="/cart"
-                className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                className="relative p-2 text-foreground/70 hover:text-foreground transition-colors"
               >
                 <ShoppingCart className="h-5 w-5" />
                 {totalItems > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-orange-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-accent text-accent-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center">
                     {totalItems}
                   </span>
                 )}
@@ -184,7 +184,7 @@ export function Layout() {
 
               {/* Mobile menu button */}
               <button
-                className="md:hidden p-2 text-gray-600 hover:text-gray-900"
+                className="md:hidden p-2 text-foreground/70 hover:text-foreground"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? (
@@ -198,7 +198,7 @@ export function Layout() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t">
+            <div className="md:hidden py-4 border-t border-border">
               <nav className="flex flex-col gap-4">
                 {navigation.map((item) => (
                   <Link
@@ -206,8 +206,8 @@ export function Layout() {
                     to={item.path}
                     className={`transition-colors ${
                       isActive(item.path)
-                        ? "text-orange-600"
-                        : "text-gray-600 hover:text-gray-900"
+                        ? "text-accent"
+                        : "text-foreground/70 hover:text-foreground"
                     }`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -215,55 +215,49 @@ export function Layout() {
                   </Link>
                 ))}
                 {!user && (
-                  <>
-                    <div className="border-t pt-4 mt-4 flex flex-col gap-3">
-                      <Link
-                        to="/login"
-                        className="text-gray-600 hover:text-gray-900 transition-colors font-medium"
-                      >
-                        Sign In
-                      </Link>
-                      <Link
-                        to="/signup"
-                        className="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors font-medium text-center"
-                      >
-                        Join
-                      </Link>
-                    </div>
-                  </>
+                  <div className="border-t border-border pt-4 mt-4 flex flex-col gap-3">
+                    <Link
+                      to="/login"
+                      className="text-foreground/70 hover:text-foreground transition-colors font-medium"
+                    >
+                      Sign In
+                    </Link>
+                    <Link
+                      to="/signup"
+                      className="bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium text-center"
+                    >
+                      Join
+                    </Link>
+                  </div>
                 )}
                 {user && isAdmin && (
-                  <>
-                    <div className="border-t pt-4 mt-4 space-y-3">
-                      <Link
-                        to="/transaction-history"
-                        className="text-gray-600 hover:text-gray-900 transition-colors font-medium flex items-center gap-2"
-                      >
-                        <Receipt className="h-4 w-4" />
-                        Transaction History
-                      </Link>
-                      <Link
-                        to="/admin"
-                        className="text-gray-600 hover:text-gray-900 transition-colors font-medium flex items-center gap-2"
-                      >
-                        <Settings className="h-4 w-4" />
-                        Admin Panel
-                      </Link>
-                    </div>
-                  </>
+                  <div className="border-t border-border pt-4 mt-4 space-y-3">
+                    <Link
+                      to="/transaction-history"
+                      className="text-foreground/70 hover:text-foreground transition-colors font-medium flex items-center gap-2"
+                    >
+                      <Receipt className="h-4 w-4" />
+                      Transaction History
+                    </Link>
+                    <Link
+                      to="/admin"
+                      className="text-foreground/70 hover:text-foreground transition-colors font-medium flex items-center gap-2"
+                    >
+                      <Settings className="h-4 w-4" />
+                      Admin Panel
+                    </Link>
+                  </div>
                 )}
                 {user && !isAdmin && (
-                  <>
-                    <div className="border-t pt-4 mt-4">
-                      <Link
-                        to="/transaction-history"
-                        className="text-gray-600 hover:text-gray-900 transition-colors font-medium flex items-center gap-2"
-                      >
-                        <Receipt className="h-4 w-4" />
-                        Transaction History
-                      </Link>
-                    </div>
-                  </>
+                  <div className="border-t border-border pt-4 mt-4">
+                    <Link
+                      to="/transaction-history"
+                      className="text-foreground/70 hover:text-foreground transition-colors font-medium flex items-center gap-2"
+                    >
+                      <Receipt className="h-4 w-4" />
+                      Transaction History
+                    </Link>
+                  </div>
                 )}
               </nav>
             </div>
@@ -286,15 +280,15 @@ export function Layout() {
       <Newsletter />
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white">
+      <footer className="bg-[#14201a] text-[#f3ede1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Leaf className="h-6 w-6 text-orange-500" />
-                <span className="text-lg">FreshMarket</span>
+                <Leaf className="h-6 w-6 text-[#e08a4f]" />
+                <span className="text-lg font-serif">FreshMarket</span>
               </div>
-              <p className="text-gray-400 text-sm">
+              <p className="text-[#f3ede1]/60 text-sm">
                 Your trusted source for fresh, organic, and locally-sourced food
                 products.
               </p>
@@ -302,36 +296,24 @@ export function Layout() {
 
             <div>
               <h3 className="font-semibold mb-4">Shop</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm text-[#f3ede1]/60">
                 <li>
-                  <Link
-                    to="/products"
-                    className="hover:text-white transition-colors"
-                  >
+                  <Link to="/products" className="hover:text-[#f3ede1] transition-colors">
                     All Products
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/products?category=Vegetables"
-                    className="hover:text-white transition-colors"
-                  >
+                  <Link to="/products?category=Vegetables" className="hover:text-[#f3ede1] transition-colors">
                     Vegetables
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/products?category=Fruits"
-                    className="hover:text-white transition-colors"
-                  >
+                  <Link to="/products?category=Fruits" className="hover:text-[#f3ede1] transition-colors">
                     Fruits
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/products?category=Bakery"
-                    className="hover:text-white transition-colors"
-                  >
+                  <Link to="/products?category=Bakery" className="hover:text-[#f3ede1] transition-colors">
                     Bakery
                   </Link>
                 </li>
@@ -340,30 +322,24 @@ export function Layout() {
 
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm text-[#f3ede1]/60">
                 <li>
-                  <Link
-                    to="/about"
-                    className="hover:text-white transition-colors"
-                  >
+                  <Link to="/about" className="hover:text-[#f3ede1] transition-colors">
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    to="/contact"
-                    className="hover:text-white transition-colors"
-                  >
+                  <Link to="/contact" className="hover:text-[#f3ede1] transition-colors">
                     Contact
                   </Link>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a href="#" className="hover:text-[#f3ede1] transition-colors">
                     Blog
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
+                  <a href="#" className="hover:text-[#f3ede1] transition-colors">
                     Careers
                   </a>
                 </li>
@@ -372,32 +348,24 @@ export function Layout() {
 
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm text-[#f3ede1]/60">
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    FAQ
-                  </a>
+                  <a href="#" className="hover:text-[#f3ede1] transition-colors">FAQ</a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Shipping
-                  </a>
+                  <a href="#" className="hover:text-[#f3ede1] transition-colors">Shipping</a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Returns
-                  </a>
+                  <a href="#" className="hover:text-[#f3ede1] transition-colors">Returns</a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-white transition-colors">
-                    Privacy Policy
-                  </a>
+                  <a href="#" className="hover:text-[#f3ede1] transition-colors">Privacy Policy</a>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
+          <div className="border-t border-[#f3ede1]/10 mt-8 pt-8 text-center text-sm text-[#f3ede1]/50">
             <p>&copy; 2026 FreshMarket. All rights reserved.</p>
           </div>
         </div>

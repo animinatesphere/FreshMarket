@@ -38,3 +38,6 @@ pnpm-debug.log*
 out/
 .next/
 dist/
+
+# Local tooling
+.claude/
